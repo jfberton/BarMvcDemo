@@ -7,6 +7,12 @@
 
 ---
 
+> 💡 **Observación sobre Refactorización:**  
+> Aunque en este repositorio nos enfocamos puntualmente en refactorizar para aplicar los principios **SOLID**, vale aclarar que el concepto de refactorización es mucho más amplio.  
+> Como define **Martin Fowler** en su libro clásico, la *refactorización* es una técnica disciplinada para reestructurar el código interno sin alterar su comportamiento externo. Fowler introduce el concepto de **Code Smells** (síntomas de mal código) como disparadores para refactorizar, identificando problemas como *Long Method* (métodos demasiado extensos), *Large Class* (clases gigantes) o *Complex Switch* (estructuras condicionales rígidas).
+
+---
+
 ## 🏛️ ¿Cómo está pensado el patrón MVC aquí?
 
 La aplicación simula la atención en la barra de un bar:
@@ -99,9 +105,69 @@ En esta etapa resolvemos la rigidez del código para agregar nuevas variedades d
 
 ---
 
+## 📍 Paso 3: Inversión de Dependencias (DIP) y Segregación de Interfaces (ISP)
+
+En esta etapa final alcanzamos el desacoplamiento total de la arquitectura:
+
+1. **Definición de Contratos / Interfaces (`IBarman`, `IBarView`):**
+   * **Segregación de Interfaces (ISP):** Se crearon contratos pequeños y específicos que definen exactamente lo que el Controlador necesita para operar.
+   * **Inversión de Dependencias (DIP):** Los módulos de alto nivel (`BarController`) ya **no dependen** de módulos de bajo nivel (`Barman`, `ConsolaView`), sino de **abstracciones**.
+
+2. **Inyección de Dependencias en `BarController.cs`:**
+   * El controlador ya no tiene ningún operador `new`. Recibe `IBarman`, `IBarView` y la colección de cervezas `IReadOnlyList<Cerveza>` por constructor.
+   * **Beneficio directo:** Ahora podemos crear pruebas unitarias inyectando mocks, o cambiar la consola por una vista Web / WPF sin modificar una sola línea del controlador.
+
+3. **`Program.cs` como *Composition Root*:**
+   * El punto de entrada es el único encargado de ensamblar e instanciar las piezas concretas y enlazarlas mediante sus interfaces.
+
+---
+
+## 🧠 ¿Por qué este orden de refactorización? (Guía metodológica)
+
+Cuando nos encontramos con código legado o mal diseñado, **el orden en que aplicamos las mejoras importa muchísimo**. Seguir esta secuencia evita retrabajo y complejidad innecesaria:
+
+```mermaid
+flowchart LR
+    A["1. SRP<br/>(Limpiar responsabilidades)"] --> B["2. OCP<br/>(Modelar variabilidad)"] --> C["3. DIP & ISP<br/>(Abstraer y desacoplar)"]
+```
+
+### 1️⃣ Primero SRP: *Aclarar el "qué hace cada cosa"*
+* **Por qué primero:** No podés abstraer ni desacoplar componentes si antes no sabés exactamente qué responsabilidad le toca a cada uno. Si extraés una interfaz de una clase que mezcla lógica de negocio con salida por consola, estás **abstrayendo el caos**.
+* **Resultado:** Clases cohesivas, con una única razón para cambiar y delimitación estricta de capas (MVC).
+
+### 2️⃣ Segundo OCP: *Reemplazar condicionales por polimorfismo*
+* **Por qué en segundo lugar:** Una vez que los métodos tienen responsabilidades atómicas y limpias, es muy fácil detectar las estructuras rígidas (`enum`, `if/else`, `switch`). En este punto convertimos la variabilidad en jerarquías polimórficas o estrategias.
+* **Resultado:** Un modelo de dominio flexible, abierto a incorporar nuevas variantes sin riesgo de romper las anteriores.
+
+### 3️⃣ Al final DIP e ISP: *Extraer contratos e invertir dependencias*
+* **Por qué al final:** Crear interfaces antes de tiempo suele producir interfaces sobrecargadas ("fat interfaces") que cambian constantemente. Cuando el diseño interno ya es estable, cohesivo y polimórfico, recién ahí extraemos los contratos mínimos e indispensables (ISP) y conectamos los módulos a través de esas abstracciones (DIP).
+* **Resultado:** Código 100% testeable con mocks, modular y desacoplado, ensamblado en un único punto (*Composition Root*).
+
+---
+
+## 🎯 Conclusiones: ¿Qué ganamos con esta refactorización?
+
+Al comparar el código entre `paso-0-inicial` y `paso-3-dip-isp`, los beneficios arquitectónicos son tangibles:
+
+1. **🧪 Testabilidad (Testing Unitario):**
+   * En el Paso 0 era imposible testear `BarController` sin abrir la consola y simular tipeo humano.
+   * Ahora podemos escribir tests unitarios aislando el controlador con mocks de `IBarView` e `IBarman`.
+
+2. **🔌 Intercambiabilidad de Vistas:**
+   * La vista de consola (`ConsolaView`) puede ser reemplazada mañana por una interfaz gráfica (WPF, Avalonia, MAUI) o una API Web creando una clase que implemente `IBarView`, sin tocar una sola línea de lógica en `BarController`.
+
+3. **🚀 Extensibilidad sin riesgo de regresiones (OCP):**
+   * Agregar una nueva variedad de cerveza (ej. *Honey*, *IPA*) ya no implica modificar clases existentes ni correr riesgo de romper lo que ya funciona. Solo creamos una nueva clase derivada de `Cerveza` y la sumamos a la carta en el punto de composición (`Program.cs`).
+
+4. **🧩 Bajo Acoplamiento y Alta Cohesión:**
+   * Cada clase tiene una única responsabilidad bien delimitada (SRP).
+   * Los componentes colaboran a través de contratos claros (ISP), dependiendo de abstracciones y no de detalles concretos (DIP).
+
+---
+
 ## 🗺️ Hoja de Ruta de la Refactorización
 
 - [x] **Paso 0 (`paso-0-inicial`)**: Estado base funcional con violaciones intencionales a SOLID y MVC.
 - [x] **Paso 1 (`paso-1-srp`)**: Aplicación del Principio de Responsabilidad Única (SRP) y delimitación estricta de MVC.
 - [x] **Paso 2 (`paso-2-ocp`)**: Aplicación del Principio Abierto/Cerrado (OCP) mediante polimorfismo.
-- [ ] **Paso 3 (`paso-3-dip-isp`)**: Inversión de Dependencias (DIP) y Segregación de Interfaces (ISP).
+- [x] **Paso 3 (`paso-3-dip-isp`)**: Inversión de Dependencias (DIP) y Segregación de Interfaces (ISP).

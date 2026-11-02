@@ -2,13 +2,10 @@ namespace BarMvcDemo.Views;
 
 using BarMvcDemo.Models;
 
-public class ConsolaView
+// PASO 3 - Implementamos IBarView para cumplir con DIP e ISP
+public class ConsolaView : IBarView
 {
-    // PASO 2 - APLICACIÓN DE OCP:
-    // La vista ahora recibe la lista polimórfica de cervezas.
-    // Si se agrega un nuevo estilo de cerveza a la carta, el menú se adapta automáticamente
-    // sin tener que modificar el código de la vista agregando líneas fijas.
-    public void MostrarMenu(List<Cerveza> cervezasDisponibles)
+    public void MostrarMenu(IReadOnlyList<Cerveza> cervezasDisponibles)
     {
         Console.Clear();
         Console.WriteLine("========================================");
