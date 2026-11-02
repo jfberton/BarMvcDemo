@@ -14,6 +14,22 @@ public class ConsolaView
         Console.Write("\nSeleccione una opción: ");
     }
 
+    // PASO 1 - APLICACIÓN DE SRP (Single Responsibility Principle)
+    // Se centraliza la captura de entrada por consola en la Vista.
+    // El Controlador ya no debe acceder a Console.ReadLine() directamente.
+    public string? LeerOpcion()
+    {
+        return Console.ReadLine();
+    }
+
+    // PASO 1 - APLICACIÓN DE SRP:
+    // La Vista asume la responsabilidad de mostrar el resultado del servicio,
+    // que antes el Modelo imprimía indebidamente por su cuenta.
+    public void MostrarCervezaServida(string detalle)
+    {
+        Console.WriteLine($"\n{detalle}");
+    }
+
     public void MostrarMensaje(string mensaje)
     {
         Console.WriteLine($"\n>> {mensaje}");

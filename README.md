@@ -57,9 +57,31 @@ La versión identificada con la etiqueta `paso-0-inicial` compila y funciona, pe
 
 ---
 
+## 📍 Paso 1: Principio de Responsabilidad Única (SRP) y Limpieza de MVC
+
+En esta etapa corregimos las fugas de responsabilidades y restauramos la separación limpia de capas en MVC:
+
+1. **`Cerveza.cs` (Modelo):**
+   * **Antes:** Hacía `Console.WriteLine(...)` dentro de `Servir()`.
+   * **Problema:** Violaba **SRP** y **MVC**, ya que el Modelo asumía la responsabilidad de presentar información y quedaba fuertemente acoplado a la consola.
+   * **Solución:** Ahora `Servir()` retorna un `string`. El Modelo procesa datos y reglas de negocio, dejando la presentación a quien le corresponde.
+
+2. **`ConsolaView.cs` (Vista):**
+   * **Mejora:** Se crearon los métodos `LeerOpcion()` (para centralizar la captura del teclado) y `MostrarCervezaServida(mensaje)` (para presentar el texto producido por el Modelo).
+
+3. **`Barman.cs` (Modelo):**
+   * **Mejora:** `AtenderPedido()` ahora retorna el resultado de la acción en lugar de depender de efectos colaterales de consola.
+
+4. **`BarController.cs` (Controlador):**
+   * **Antes:** Ejecutaba `Console.ReadLine()` directamente.
+   * **Problema:** Violaba **SRP**, involucrando al Controlador en detalles de I/O de bajo nivel.
+   * **Solución:** Delega la captura a `_view.LeerOpcion()` y coordina el flujo enviando los resultados a la Vista.
+
+---
+
 ## 🗺️ Hoja de Ruta de la Refactorización
 
 - [x] **Paso 0 (`paso-0-inicial`)**: Estado base funcional con violaciones intencionales a SOLID y MVC.
-- [ ] **Paso 1 (`paso-1-srp`)**: Aplicación del Principio de Responsabilidad Única (SRP) y delimitación estricta de MVC.
+- [x] **Paso 1 (`paso-1-srp`)**: Aplicación del Principio de Responsabilidad Única (SRP) y delimitación estricta de MVC.
 - [ ] **Paso 2 (`paso-2-ocp`)**: Aplicación del Principio Abierto/Cerrado (OCP) mediante polimorfismo.
 - [ ] **Paso 3 (`paso-3-dip-isp`)**: Inversión de Dependencias (DIP) y Segregación de Interfaces (ISP).
