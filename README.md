@@ -79,9 +79,29 @@ En esta etapa corregimos las fugas de responsabilidades y restauramos la separac
 
 ---
 
+## 📍 Paso 2: Principio Abierto/Cerrado (OCP) y Extensibilidad
+
+En esta etapa resolvemos la rigidez del código para agregar nuevas variedades de cervezas:
+
+1. **Polimorfismo en `Cerveza.cs`:**
+   * **Antes:** Existía un `enum TipoCerveza` y una sola clase con un `if/else` en `Servir()`. Agregar una variedad exigía **modificar** código existente.
+   * **Solución:** Se transformó `Cerveza` en una clase abstracta base con implementaciones concretas (`CervezaRubia`, `CervezaNegra`).
+   * **Demostración de OCP:** Se agregó **`CervezaRoja`** únicamente extendiendo `Cerveza`, sin tocar ni una sola línea de `CervezaRubia` ni de `CervezaNegra`.
+
+2. **`Barman.cs` desacoplado del enum:**
+   * Ahora el método `ServirCerveza(Cerveza cerveza)` recibe cualquier subtipo de `Cerveza` de forma polimórfica.
+
+3. **Menú dinámico en `ConsolaView.cs`:**
+   * `MostrarMenu(List<Cerveza> cervezas)` itera sobre la carta disponible en vez de tener opciones fijas en texto plano.
+
+4. **Eliminación del switch rígido en `BarController.cs`:**
+   * La selección del usuario se valida numéricamente contra la carta. Ya no hay `case "1"`, `case "2"` cableados a mano.
+
+---
+
 ## 🗺️ Hoja de Ruta de la Refactorización
 
 - [x] **Paso 0 (`paso-0-inicial`)**: Estado base funcional con violaciones intencionales a SOLID y MVC.
 - [x] **Paso 1 (`paso-1-srp`)**: Aplicación del Principio de Responsabilidad Única (SRP) y delimitación estricta de MVC.
-- [ ] **Paso 2 (`paso-2-ocp`)**: Aplicación del Principio Abierto/Cerrado (OCP) mediante polimorfismo.
+- [x] **Paso 2 (`paso-2-ocp`)**: Aplicación del Principio Abierto/Cerrado (OCP) mediante polimorfismo.
 - [ ] **Paso 3 (`paso-3-dip-isp`)**: Inversión de Dependencias (DIP) y Segregación de Interfaces (ISP).

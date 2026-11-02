@@ -1,38 +1,51 @@
 namespace BarMvcDemo.Models;
 
-public enum TipoCerveza
+// PASO 2 - APLICACIÓN DE OCP (Open/Closed Principle)
+//
+// ANTES (Paso 0 y 1):
+// Existía un enum 'TipoCerveza' y una única clase 'Cerveza' con condicionales (if/else).
+// VIOLACIÓN: Para agregar un nuevo tipo (ej. Roja o IPA), estábamos obligados a MODIFICAR
+// el enum y la clase Cerveza existente. El código no estaba "cerrado a la modificación".
+//
+// AHORA:
+// Convertimos 'Cerveza' en una clase base abstracta con polimorfismo.
+// Cada variedad es una clase que extiende de Cerveza.
+// El sistema queda "abierto a la extensión y cerrado a la modificación":
+// para agregar una nueva cerveza, creamos una nueva clase sin tocar las anteriores.
+
+public abstract class Cerveza
 {
-    Rubia,
-    Negra
+    public abstract string Nombre { get; }
+    public abstract string Servir();
 }
 
-public class Cerveza
+public class CervezaRubia : Cerveza
 {
-    public TipoCerveza Tipo { get; set; }
+    public override string Nombre => "Rubia";
 
-    public Cerveza(TipoCerveza tipo)
+    public override string Servir()
     {
-        Tipo = tipo;
+        return "🍺 Tirando una pinta de Rubia suave y refrescante...";
     }
+}
 
-    // PASO 1 - APLICACIÓN DE SRP (Single Responsibility Principle)
-    // ANTES: Este método hacía Console.WriteLine(...) directamente.
-    // VIOLACIÓN: Violaba SRP y la arquitectura MVC porque el Modelo asumía la responsabilidad
-    //     de la presentación (I/O de consola), acoplándose al medio visual. 
-    //     Si mañana este modelo se usa en una API Web o app móvil, ese Console.WriteLine no sirve
-    // AHORA: El Modelo solo procesa la lógica y retorna información (string).
-    //     La responsabilidad de imprimir en pantalla pasa exclusivamente a la Vista.
-    public string Servir()
+public class CervezaNegra : Cerveza
+{
+    public override string Nombre => "Negra";
+
+    public override string Servir()
     {
-        if (Tipo == TipoCerveza.Rubia)
-        {
-            //Console.WriteLine("🍺 [Modelo] Tirando una pinta de Rubia suave y refrescante...");
-            return "🍺 Tirando una pinta de Rubia suave y refrescante...";
-        }
-        else
-        {
-            //Console.WriteLine("🍺 [Modelo] Tirando una pinta de Negra tostada con espuma cremosa...");
-            return "🍺 Tirando una pinta de Negra tostada con espuma cremosa...";
-        }
+        return "🍺 Tirando una pinta de Negra tostada con espuma cremosa...";
+    }
+}
+
+// ¡Demostración de OCP!: Agregamos CervezaRoja sin tener que modificar CervezaRubia ni CervezaNegra.
+public class CervezaRoja : Cerveza
+{
+    public override string Nombre => "Roja";
+
+    public override string Servir()
+    {
+        return "🍺 Tirando una pinta de Roja caramelizada y maltosa...";
     }
 }

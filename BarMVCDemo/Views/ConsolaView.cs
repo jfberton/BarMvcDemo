@@ -1,30 +1,34 @@
 namespace BarMvcDemo.Views;
 
+using BarMvcDemo.Models;
+
 public class ConsolaView
 {
-    public void MostrarMenu()
+    // PASO 2 - APLICACIÓN DE OCP:
+    // La vista ahora recibe la lista polimórfica de cervezas.
+    // Si se agrega un nuevo estilo de cerveza a la carta, el menú se adapta automáticamente
+    // sin tener que modificar el código de la vista agregando líneas fijas.
+    public void MostrarMenu(List<Cerveza> cervezasDisponibles)
     {
         Console.Clear();
         Console.WriteLine("========================================");
         Console.WriteLine("    BIENVENIDO AL BAR (PATRÓN MVC)     ");
         Console.WriteLine("========================================");
-        Console.WriteLine("1. Pedir Cerveza Rubia");
-        Console.WriteLine("2. Pedir Cerveza Negra");
-        Console.WriteLine("3. Salir");
+
+        for (int i = 0; i < cervezasDisponibles.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. Pedir Cerveza {cervezasDisponibles[i].Nombre}");
+        }
+
+        Console.WriteLine($"{cervezasDisponibles.Count + 1}. Salir");
         Console.Write("\nSeleccione una opción: ");
     }
 
-    // PASO 1 - APLICACIÓN DE SRP (Single Responsibility Principle)
-    // Se centraliza la captura de entrada por consola en la Vista.
-    // El Controlador ya no debe acceder a Console.ReadLine() directamente.
     public string? LeerOpcion()
     {
         return Console.ReadLine();
     }
 
-    // PASO 1 - APLICACIÓN DE SRP:
-    // La Vista asume la responsabilidad de mostrar el resultado del servicio,
-    // que antes el Modelo imprimía indebidamente por su cuenta.
     public void MostrarCervezaServida(string detalle)
     {
         Console.WriteLine($"\n{detalle}");

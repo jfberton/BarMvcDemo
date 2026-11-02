@@ -7,11 +7,23 @@ public class BarController
 {
     private readonly Barman _barman;
     private readonly ConsolaView _view;
+    private readonly List<Cerveza> _cartaDeCervezas;
 
     public BarController(Barman barman, ConsolaView view)
     {
         _barman = barman;
         _view = view;
+
+        // PASO 2 - APLICACIÓN DE OCP:
+        // Definimos la carta de cervezas disponibles usando polimorfismo.
+        // (Nota para Paso 3: Instanciar clases concretas aquí viola DIP; 
+        // en el siguiente paso abstraeremos esto con un catálogo o fábrica inyectada).
+        _cartaDeCervezas = new List<Cerveza>
+        {
+            new CervezaRubia(),
+            new CervezaNegra(),
+            new CervezaRoja() // Nueva variedad incorporada sin tocar las anteriores
+        };
     }
 
     public void Iniciar()
@@ -20,38 +32,28 @@ public class BarController
 
         while (ejecutando)
         {
-            _view.MostrarMenu();
-            
-            // PASO 1 - APLICACIÓN DE SRP:
-            // ANTES: string? opcion = Console.ReadLine();
-            // VIOLACIÓN: El Controlador asumía la responsabilidad de interactuar con el dispositivo de entrada (I/O).
-            // AHORA: Delegamos la lectura a la Vista (_view.LeerOpcion()).
+            _view.MostrarMenu(_cartaDeCervezas);
             string? opcion = _view.LeerOpcion();
 
-            switch (opcion)
+            // PASO 2 - APLICACIÓN DE OCP:
+            // Eliminamos el switch rígido (case "1", case "2", etc.).
+            // Ahora la selección se procesa dinámicamente según las cervezas disponibles en la carta.
+            if (int.TryParse(opcion, out int seleccion) && seleccion >= 1 && seleccion <= _cartaDeCervezas.Count)
             {
-                case "1":
-                    // PASO 1 - APLICACIÓN DE SRP:
-                    // ANTES: _barman.AtenderPedido(TipoCerveza.Rubia); -> la clase Cerveza hacia la impresion directamente.
-                    // AHORA: El Modelo retorna el mensaje de la cerveza servida, y el Controlador
-                    // orquesta el flujo enviándolo a la Vista para su presentación.
-                    string mensajeRubia = _barman.AtenderPedido(TipoCerveza.Rubia);
-                    _view.MostrarCervezaServida(mensajeRubia);
-                    _view.Pausa();
-                    break;
-                case "2":
-                    string mensajeNegra = _barman.AtenderPedido(TipoCerveza.Negra);
-                    _view.MostrarCervezaServida(mensajeNegra);
-                    _view.Pausa();
-                    break;
-                case "3":
-                    ejecutando = false;
-                    _view.MostrarMensaje("Cerrando el bar. ¡Hasta la próxima!");
-                    break;
-                default:
-                    _view.MostrarMensaje("Opción inválida. Intente de nuevo.");
-                    _view.Pausa();
-                    break;
+                var cervezaSeleccionada = _cartaDeCervezas[seleccion - 1];
+                string mensaje = _barman.ServirCerveza(cervezaSeleccionada);
+                _view.MostrarCervezaServida(mensaje);
+                _view.Pausa();
+            }
+            else if (seleccion == _cartaDeCervezas.Count + 1)
+            {
+                ejecutando = false;
+                _view.MostrarMensaje("Cerrando el bar. ¡Hasta la próxima!");
+            }
+            else
+            {
+                _view.MostrarMensaje("Opción inválida. Intente de nuevo.");
+                _view.Pausa();
             }
         }
     }
